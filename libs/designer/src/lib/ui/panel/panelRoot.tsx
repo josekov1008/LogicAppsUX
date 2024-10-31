@@ -15,8 +15,8 @@ import { NodeSearchPanel } from './nodeSearchPanel/nodeSearchPanel';
 import { RecommendationPanelContext } from './recommendation/recommendationPanelContext';
 import { WorkflowParametersPanel } from './workflowParametersPanel/workflowParametersPanel';
 import { WorkflowParametersPanelFooter } from './workflowParametersPanel/workflowParametersPanelFooter';
-import { Panel, PanelType } from '@fluentui/react';
-import { Spinner } from '@fluentui/react-components';
+import { DialogType, Panel, PanelType } from '@fluentui/react';
+import { Dialog, DialogBody, DialogContent, DialogSurface, DialogTitle, Popover, PopoverSurface, Spinner } from '@fluentui/react-components';
 import { isUndefined } from '@microsoft/applicationinsights-core-js';
 import type { CommonPanelProps, CustomPanelLocation } from '@microsoft/designer-ui';
 import { PanelLocation, PanelResizer, PanelSize } from '@microsoft/designer-ui';
@@ -44,6 +44,7 @@ export const PanelRoot = (props: PanelRootProps): JSX.Element => {
   const collapsed = useIsPanelCollapsed();
   const currentPanelMode = useCurrentPanelMode();
   const focusReturnElementId = useFocusReturnElementId();
+  const [modalOpen, setModalOpen] = useState(false);
 
   const panelContainerElement = panelContainerRef.current;
 
@@ -124,45 +125,61 @@ export const PanelRoot = (props: PanelRootProps): JSX.Element => {
   return !isLoadingPanel && (isUndefined(currentPanelMode) || currentPanelMode === 'Operation') ? (
     <NodeDetailsPanel {...commonPanelProps} />
   ) : (
-    <Panel
-      className={`msla-panel-root-${currentPanelMode}`}
-      isLightDismiss
-      isBlocking={!isLoadingPanel && !nonBlockingPanels.includes(currentPanelMode ?? '')}
-      type={commonPanelProps.panelLocation === PanelLocation.Right ? PanelType.custom : PanelType.customNear}
-      isOpen={!collapsed}
-      onDismiss={dismissPanel}
-      hasCloseButton={false}
-      overlayProps={{ isDarkThemed: isDarkMode }}
-      layerProps={layerProps}
-      customWidth={width}
-      onRenderFooterContent={onRenderFooterContent}
-      isFooterAtBottom={true}
-      styles={({ theme }) => ({
-        footer: {
-          backgroundColor: theme?.semanticColors.bodyBackground,
-          borderTop: 0,
-        },
-      })}
-      popupProps={{
-        ariaLabel: currentPanelMode ? panelLabels?.[currentPanelMode] : undefined,
-      }}
-    >
-      {isResizeable ? <PanelResizer updatePanelWidth={setWidth} /> : null}
-      {
-        isLoadingPanel ? (
-          <LoadingComponent />
-        ) : currentPanelMode === 'WorkflowParameters' ? (
-          <WorkflowParametersPanel {...commonPanelProps} />
-        ) : currentPanelMode === 'Discovery' ? (
-          <RecommendationPanelContext {...commonPanelProps} />
-        ) : currentPanelMode === 'NodeSearch' ? (
-          <NodeSearchPanel {...commonPanelProps} focusReturnElementId={focusReturnElementId} />
-        ) : currentPanelMode === 'Connection' ? (
-          <ConnectionPanel {...commonPanelProps} />
-        ) : currentPanelMode === 'Error' ? (
-          <ErrorsPanel {...commonPanelProps} />
-        ) : null // Caught above
-      }
-    </Panel>
+    <Dialog modalType='non-modal' open={!collapsed} onOpenChange={(event, data) => !data.open ? dismissPanel() : undefined}>
+      <DialogSurface
+        // className={`msla-panel-root-${currentPanelMode}`}
+        // style={{
+        //   padding: '4px',
+        //   width: '1600',
+        // }}
+        // isLightDismiss
+        // isBlocking={!isLoadingPanel && !nonBlockingPanels.includes(currentPanelMode ?? '')}
+        // type={commonPanelProps.panelLocation === PanelLocation.Right ? PanelType.custom : PanelType.customNear}
+        // isOpen={!collapsed}
+        // onDismiss={dismissPanel}
+        // hasCloseButton={false}
+        // overlayProps={{ isDarkThemed: isDarkMode }}
+        // layerProps={layerProps}
+        // customWidth={width}
+        // onRenderFooterContent={onRenderFooterContent}
+        // isFooterAtBottom={true}
+        // styles={({ theme }) => ({
+        //   footer: {
+        //     backgroundColor: theme?.semanticColors.bodyBackground,
+        //     borderTop: 0,
+        //   },
+        // })}
+        // popupProps={{
+        //   ariaLabel: currentPanelMode ? panelLabels?.[currentPanelMode] : undefined,
+        // }}
+        // style={{width: '1250px', height: '500px'}}
+        // backdrop={null}
+      >
+        <DialogBody style={{width: '100%', height: '750px', gridTemplateColumns: 'none'}}>
+          <DialogTitle>Add an Action</DialogTitle>
+          <DialogContent type={DialogType.normal} /*styles={{ innerContent: { width: '100%' } }}*/>
+            {/* Hello World */}
+            <RecommendationPanelContext {...commonPanelProps} />
+            {/* {isResizeable ? <PanelResizer updatePanelWidth={setWidth} /> : null}
+            {
+              isLoadingPanel ? (
+                <LoadingComponent />
+              ) : currentPanelMode === 'WorkflowParameters' ? (
+                <WorkflowParametersPanel {...commonPanelProps} />
+              ) : currentPanelMode === 'Discovery' ? (
+                <RecommendationPanelContext {...commonPanelProps} />
+                // <h1>Hello World! 1</h1>
+              ) : currentPanelMode === 'NodeSearch' ? (
+                <NodeSearchPanel {...commonPanelProps} focusReturnElementId={focusReturnElementId} />
+              ) : currentPanelMode === 'Connection' ? (
+                <ConnectionPanel {...commonPanelProps} />
+              ) : currentPanelMode === 'Error' ? (
+                <ErrorsPanel {...commonPanelProps} />
+              ) : null // Caught above
+            } */}
+          </DialogContent>
+        </DialogBody>
+      </DialogSurface>
+    </Dialog>
   );
 };

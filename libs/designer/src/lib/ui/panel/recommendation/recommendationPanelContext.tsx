@@ -210,10 +210,10 @@ export const RecommendationPanelContext = (props: CommonPanelProps) => {
 
   return (
     <>
-      <div className="msla-app-action-header">
+      {/* <div className="msla-app-action-header">
         <XLargeText text={headingText} />
         <Button aria-label={closeButtonAriaLabel} appearance="subtle" onClick={toggleCollapse} icon={<CloseIcon />} />
-      </div>
+      </div> */}
       {selectionState !== SELECTION_STATES.SEARCH || selectedOperationGroupId ? (
         <div className={'msla-sub-heading-container'}>
           <Link onClick={navigateBack} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
