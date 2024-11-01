@@ -15,7 +15,7 @@ import { CustomSwaggerSelection } from './customSwaggerSelection';
 import { OperationGroupDetailView } from './operationGroupDetailView';
 import { SearchView } from './searchView';
 import { Link, Icon } from '@fluentui/react';
-import { Button } from '@fluentui/react-components';
+import { Button, Divider } from '@fluentui/react-components';
 import { bundleIcon, Dismiss24Filled, Dismiss24Regular } from '@fluentui/react-icons';
 import { SearchService, equals, guid, areApiIdsEqual } from '@microsoft/logic-apps-shared';
 import { OperationSearchHeader, XLargeText } from '@microsoft/designer-ui';
@@ -25,6 +25,9 @@ import { useDebouncedEffect } from '@react-hookz/web';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { useDispatch } from 'react-redux';
+import { deleteGraphNode } from '../../../core/actions/bjsworkflow/delete';
+import constants from '../../../common/constants';
+import { useWorkflowNode } from '../../../core/state/workflow/workflowSelectors';
 
 const CloseIcon = bundleIcon(Dismiss24Filled, Dismiss24Regular);
 
@@ -40,7 +43,7 @@ export const RecommendationPanelContext = (props: CommonPanelProps) => {
   const { toggleCollapse } = props;
   const { displayRuntimeInfo } = useHostOptions();
   const dispatch = useDispatch<AppDispatch>();
-  const isTrigger = useDiscoveryPanelIsAddingTrigger();
+  const isTrigger = useDiscoveryPanelIsAddingTrigger() && props.isTrigger;
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState<Record<string, string>>({
     actionType: isTrigger ? 'triggers' : 'actions',
@@ -93,6 +96,7 @@ export const RecommendationPanelContext = (props: CommonPanelProps) => {
   const selectedOperationGroupId = useDiscoveryPanelSelectedOperationGroupId();
   const { data: allConnectors } = useAllConnectors();
   const selectedConnector = allConnectors?.find((c) => c.id === selectedOperationGroupId);
+  const addActionNode = useWorkflowNode(constants.NODE.TYPE.PLACEHOLDER);
 
   // hide actions type filter if we don't have any operations for the browse view
   const hideActionTypeFilter = (!allOperations || allOperations.length === 0) && !searchTerm;
@@ -108,11 +112,11 @@ export const RecommendationPanelContext = (props: CommonPanelProps) => {
     const searchResultPromise = searchOperation
       ? searchOperation(selectedOperationGroupId, hideActionTypeFilter ? undefined : filters['actionType']?.toLowerCase())
       : Promise.resolve(
-          (allOperations ?? []).filter((operation) => {
-            const apiId = operation.properties.api.id;
-            return areApiIdsEqual(apiId, selectedOperationGroupId);
-          })
-        );
+        (allOperations ?? []).filter((operation) => {
+          const apiId = operation.properties.api.id;
+          return areApiIdsEqual(apiId, selectedOperationGroupId);
+        })
+      );
 
     setIsLoadingOperationGroup(true);
     searchResultPromise
@@ -132,7 +136,7 @@ export const RecommendationPanelContext = (props: CommonPanelProps) => {
     setSelectionState(SELECTION_STATES.SEARCH);
   }, [dispatch]);
 
-  const relationshipIds = useDiscoveryPanelRelationshipIds();
+  const relationshipIds = { ...useDiscoveryPanelRelationshipIds(), ...props.relationshipIds };
   const isParallelBranch = useDiscoveryPanelIsParallelBranch();
 
   const hasAzureResourceSelection = useCallback((operation: DiscoveryOperation<DiscoveryResultTypes>) => {
@@ -176,9 +180,11 @@ export const RecommendationPanelContext = (props: CommonPanelProps) => {
         }
         const newNodeId = (operation?.properties?.summary ?? operation?.name ?? guid()).replaceAll(' ', '_');
         dispatch(addOperation({ operation, relationshipIds, nodeId: newNodeId, isParallelBranch, isTrigger }));
+        dispatch(deleteGraphNode({graphId: relationshipIds.graphId, graphNode: addActionNode!}));
       });
     },
     [
+      addActionNode,
       allOperations,
       dispatch,
       hasAzureResourceSelection,
@@ -210,18 +216,18 @@ export const RecommendationPanelContext = (props: CommonPanelProps) => {
 
   return (
     <>
-      {/* <div className="msla-app-action-header">
+      <div className="">
         <XLargeText text={headingText} />
-        <Button aria-label={closeButtonAriaLabel} appearance="subtle" onClick={toggleCollapse} icon={<CloseIcon />} />
-      </div> */}
-      {selectionState !== SELECTION_STATES.SEARCH || selectedOperationGroupId ? (
+        {/* <Button aria-label={closeButtonAriaLabel} appearance="subtle" onClick={toggleCollapse} icon={<CloseIcon />} /> */}
+      </div>
+      {/* {selectionState !== SELECTION_STATES.SEARCH || selectedOperationGroupId ? (
         <div className={'msla-sub-heading-container'}>
           <Link onClick={navigateBack} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Icon iconName="Back" />
             {returnToSearchText}
           </Link>
         </div>
-      ) : null}
+      ) : null} */}
       {
         {
           [SELECTION_STATES.AZURE_RESOURCE]: selectedOperation ? <AzureResourceSelection operation={selectedOperation} /> : null,
@@ -246,10 +252,11 @@ export const RecommendationPanelContext = (props: CommonPanelProps) => {
                 searchTerm={searchTerm}
                 filters={filters}
                 setFilters={setFilters}
-                isTriggerNode={isTrigger}
+                isTriggerNode={isTrigger!}
                 displayRuntimeInfo={displayRuntimeInfo}
                 displayActionType={!hideActionTypeFilter}
               />
+              <Divider style={{ marginTop: '18px', marginBottom: '18px' }} />
               {searchTerm ? (
                 <SearchView
                   searchTerm={searchTerm}

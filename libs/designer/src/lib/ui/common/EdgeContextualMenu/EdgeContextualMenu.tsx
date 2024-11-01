@@ -31,6 +31,7 @@ import {
 } from '@fluentui/react-icons';
 import { pasteOperation, pasteScopeOperation } from '../../../core/actions/bjsworkflow/copypaste';
 import { useUpstreamNodes } from '../../../core/state/tokens/tokenSelectors';
+import { addActionNode } from '../../../core/state/workflow/workflowSlice';
 
 const AddIcon = bundleIcon(ArrowBetweenDown24Filled, ArrowBetweenDown24Regular);
 const ParallelIcon = bundleIcon(ArrowSplit24Filled, ArrowSplit24Regular);
@@ -105,7 +106,8 @@ export const EdgeContextualMenu = () => {
       return;
     }
     const relationshipIds = { graphId, childId, parentId };
-    dispatch(expandDiscoveryPanel({ nodeId: newId, relationshipIds }));
+    // dispatch(expandDiscoveryPanel({ nodeId: newId, relationshipIds }));
+    dispatch(addActionNode({ nodeId: newId, relationshipIds}));
     LoggerService().log({
       area: 'DropZone:openAddNodePanel',
       level: LogEntryLevel.Verbose,

@@ -38,6 +38,7 @@ import { PerformanceDebugTool } from './common/PerformanceDebug/PerformanceDebug
 import { CanvasFinder } from './CanvasFinder';
 import { DesignerContextualMenu } from './common/DesignerContextualMenu/DesignerContextualMenu';
 import { EdgeContextualMenu } from './common/EdgeContextualMenu/EdgeContextualMenu';
+import AddActionNode from './CustomNodes/addActionNode';
 
 export interface DesignerProps {
   backgroundProps?: BackgroundProps;
@@ -57,6 +58,7 @@ const nodeTypes: NodeTypesObj = {
   SUBGRAPH_CARD_NODE: SubgraphCardNode,
   HIDDEN_NODE: HiddenNode,
   PLACEHOLDER_NODE: PlaceholderNode,
+  ADD_ACTION_NODE: AddActionNode,
 };
 
 const edgeTypes = {

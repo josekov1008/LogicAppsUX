@@ -1,8 +1,8 @@
 import constants from '../../../common/constants';
 import { updateNodeConnection } from '../../actions/bjsworkflow/connections';
 import { initializeGraphState } from '../../parsers/ParseReduxAction';
-import type { AddNodePayload } from '../../parsers/addNodeToWorkflow';
-import { addSwitchCaseToWorkflow, addNodeToWorkflow } from '../../parsers/addNodeToWorkflow';
+import type { AddNodePayload, AddActionNodePayload } from '../../parsers/addNodeToWorkflow';
+import { addSwitchCaseToWorkflow, addNodeToWorkflow, addChildNode } from '../../parsers/addNodeToWorkflow';
 import type { DeleteNodePayload } from '../../parsers/deleteNodeFromWorkflow';
 import { deleteWorkflowNode, deleteNodeFromWorkflow } from '../../parsers/deleteNodeFromWorkflow';
 import type { WorkflowNode } from '../../parsers/models/workflowNode';
@@ -11,7 +11,7 @@ import type { MoveNodePayload } from '../../parsers/moveNodeInWorkflow';
 import { moveNodeInWorkflow } from '../../parsers/moveNodeInWorkflow';
 import { pasteScopeInWorkflow } from '../../parsers/pasteScopeInWorkflow';
 import type { PasteScopeNodePayload } from '../../parsers/pasteScopeInWorkflow';
-import { addNewEdge } from '../../parsers/restructuringHelpers';
+import { addNewEdge, removeEdge } from '../../parsers/restructuringHelpers';
 import { createWorkflowNode, getImmediateSourceNodeIds, transformOperationTitle } from '../../utils/graph';
 import { resetWorkflowState, setStateAfterUndoRedo } from '../global';
 import type { NodeOperation } from '../operation/operationMetadataSlice';
@@ -203,6 +203,41 @@ export const workflowSlice = createSlice({
         message: action.type,
         args: [action.payload],
       });
+    },
+    addActionNode: (state: WorkflowState, payload: PayloadAction<AddActionNodePayload>) => {
+      if (!state.graph) {
+        return; // log exception
+      }
+
+      // const nodeId = payload.payload.nodeId;
+      const { graphId, parentId, childId } = payload.payload.relationshipIds;
+      const graph = getWorkflowNodeFromGraphState(state, graphId);
+      if (!graph) {
+        throw new Error('graph not set');
+      }
+
+      const workflowNode = createWorkflowNode(
+        constants.NODE.TYPE.PLACEHOLDER,
+        WORKFLOW_NODE_TYPES.PLACEHOLDER_ADD_ACTION_NODE
+      );
+
+      workflowNode.width = 800;
+      workflowNode.height = 400;
+
+      graph.children = [...(graph?.children ?? []), workflowNode];
+
+      state.nodesMetadata[constants.NODE.TYPE.PLACEHOLDER] = { graphId, parentNodeId: parentId, isRoot: false }
+      state.operations[constants.NODE.TYPE.PLACEHOLDER] = workflowNode
+
+      if (parentId) {
+        addNewEdge(state, parentId, constants.NODE.TYPE.PLACEHOLDER, graph);
+      }
+      if (childId) {
+        addNewEdge(state, constants.NODE.TYPE.PLACEHOLDER, childId, graph, true);
+        removeEdge(state, parentId!, childId, graph);
+      }
+      // addNodeToWorkflow(placeholderNode, graph, state.nodesMetadata, state)
+      // addChildNode(graph, placeholderNode);
     },
     deleteNode: (state: WorkflowState, action: PayloadAction<DeleteNodePayload>) => {
       if (!state.graph) {
@@ -583,6 +618,7 @@ export const {
   setRepetitionRunData,
   setIsWorkflowDirty,
   setHostErrorMessages,
+  addActionNode
 } = workflowSlice.actions;
 
 export default workflowSlice.reducer;

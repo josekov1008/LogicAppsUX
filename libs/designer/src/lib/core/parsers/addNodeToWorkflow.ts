@@ -23,6 +23,11 @@ export interface AddNodePayload {
   isTrigger?: boolean;
 }
 
+export interface AddActionNodePayload {
+  nodeId: string;
+  relationshipIds: RelationshipIds;
+}
+
 export const addNodeToWorkflow = (
   payload: AddNodePayload,
   workflowGraph: WorkflowNode,

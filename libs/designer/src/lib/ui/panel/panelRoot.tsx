@@ -156,8 +156,8 @@ export const PanelRoot = (props: PanelRootProps): JSX.Element => {
         // backdrop={null}
       >
         <DialogBody style={{width: '100%', height: '750px', gridTemplateColumns: 'none'}}>
-          <DialogTitle>Add an Action</DialogTitle>
-          <DialogContent type={DialogType.normal} /*styles={{ innerContent: { width: '100%' } }}*/>
+          <DialogTitle>Add Action</DialogTitle>
+          <DialogContent /*styles={{ innerContent: { width: '100%' } }}*/>
             {/* Hello World */}
             <RecommendationPanelContext {...commonPanelProps} />
             {/* {isResizeable ? <PanelResizer updatePanelWidth={setWidth} /> : null}

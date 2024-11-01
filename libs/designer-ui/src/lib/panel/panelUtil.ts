@@ -44,6 +44,7 @@ export interface PanelTab {
 }
 
 export interface CommonPanelProps {
+  isTrigger?: boolean;
   isCollapsed: boolean;
   toggleCollapse: () => void;
   overrideWidth?: string;
@@ -51,4 +52,5 @@ export interface CommonPanelProps {
   panelLocation: PanelLocation;
   isResizeable?: boolean;
   mountNode?: HTMLElement;
+  relationshipIds?: any;
 }

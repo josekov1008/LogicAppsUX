@@ -58,24 +58,24 @@ export const OperationSearchHeader = (props: OperationSearchHeaderProps) => {
 
   const actionTypeFilters = isTriggerNode
     ? [
-        {
-          key: 'actionType-triggers',
-          text: intl.formatMessage({ defaultMessage: 'Triggers', id: 'piaRy6', description: 'Filter by Triggers category of connectors' }),
-          value: 'triggers',
-        },
-      ]
+      {
+        key: 'actionType-triggers',
+        text: intl.formatMessage({ defaultMessage: 'Triggers', id: 'piaRy6', description: 'Filter by Triggers category of connectors' }),
+        value: 'triggers',
+      },
+    ]
     : [
-        {
-          key: 'actionType-triggers',
-          text: intl.formatMessage({ defaultMessage: 'Triggers', id: 'piaRy6', description: 'Filter by Triggers category of connectors' }),
-          value: 'triggers',
-        },
-        {
-          key: 'actionType-actions',
-          text: intl.formatMessage({ defaultMessage: 'Actions', id: 'bG9rjv', description: 'Filter by Actions category of connectors' }),
-          value: 'actions',
-        },
-      ];
+      {
+        key: 'actionType-triggers',
+        text: intl.formatMessage({ defaultMessage: 'Triggers', id: 'piaRy6', description: 'Filter by Triggers category of connectors' }),
+        value: 'triggers',
+      },
+      {
+        key: 'actionType-actions',
+        text: intl.formatMessage({ defaultMessage: 'Actions', id: 'bG9rjv', description: 'Filter by Actions category of connectors' }),
+        value: 'actions',
+      },
+    ];
 
   const groupByConnectorLabelText = intl.formatMessage({
     defaultMessage: 'Group by Connector',
@@ -104,6 +104,20 @@ export const OperationSearchHeader = (props: OperationSearchHeaderProps) => {
     }
   };
 
+  const toggleCategory = (category: string) => {
+    if (category) {
+      const newFilters = { ...filters };
+      if (filters?.['runtime'] === category) {
+        delete newFilters['runtime'];
+      }
+      else {
+        newFilters['runtime'] = category;
+      }
+
+      setFilters?.(newFilters);
+    }
+  }
+
   const runtimeText = intl.formatMessage({
     defaultMessage: 'Runtime',
     id: 'g5A6Bn',
@@ -117,37 +131,44 @@ export const OperationSearchHeader = (props: OperationSearchHeaderProps) => {
   });
 
   return (
-    <div className="msla-sub-heading-container">
+    <div /*className="msla-sub-heading-container"*/>
       <DesignerSearchBox searchCallback={searchCallback} searchTerm={searchTerm} />
       {displayRuntimeInfo || displayActionType ? (
         <div style={{ display: 'grid', grid: 'auto-flow / 1fr 1fr', gridColumnGap: '8px' }}>
           {displayRuntimeInfo && runtimeFilters.length > 0 ? (
-            <div style={{ display: 'inherit' }}>
-              <Label htmlFor={'runtimeDropdown'}>{runtimeText}</Label>
-              <Dropdown
-                id={'runtimeDropdown'}
-                placeholder={
-                  filters?.['runtime']
-                    ? runtimeFilters?.find((data) => data.value === filters['runtime'])?.text
-                    : intl.formatMessage({
-                        defaultMessage: 'Select a runtime',
-                        id: 'uc3ytS',
-                        description: 'Select a runtime placeholder',
-                      })
-                }
-                onOptionSelect={(_e, data) => onOptionSelect(data, 'runtime')}
-                multiselect={true}
-                selectedOptions={filters?.['runtime'] ? [filters['runtime']] : []}
-              >
-                {runtimeFilters.map((item) => (
-                  <Option key={item.key} text={item.text} value={item.value}>
-                    {item.text}
-                  </Option>
-                ))}
-              </Dropdown>
-            </div>
+            // <div style={{ display: 'inherit' }}>
+            //   <Label htmlFor={'runtimeDropdown'}>{runtimeText}</Label>
+            //   <Dropdown
+            //     id={'runtimeDropdown'}
+            //     placeholder={
+            //       filters?.['runtime']
+            //         ? runtimeFilters?.find((data) => data.value === filters['runtime'])?.text
+            //         : intl.formatMessage({
+            //           defaultMessage: 'Select a runtime',
+            //           id: 'uc3ytS',
+            //           description: 'Select a runtime placeholder',
+            //         })
+            //     }
+            //     onOptionSelect={(_e, data) => onOptionSelect(data, 'runtime')}
+            //     multiselect={true}
+            //     selectedOptions={filters?.['runtime'] ? [filters['runtime']] : []}
+            //   >
+            //     {runtimeFilters.map((item) => (
+            //       <Option key={item.key} text={item.text} value={item.value}>
+            //         {item.text}
+            //       </Option>
+            //     ))}
+            //   </Dropdown>
+            // </div>
+            <>
+              {runtimeFilters.map((item) => (
+                <Checkbox key={item.key} label={item.text} onChange={(_ev, _isChecked?) => (
+                  toggleCategory(item.value)
+                )}/>
+              ))}
+            </>
           ) : null}
-          {displayActionType ? (
+          {/* {displayActionType ? (
             <div style={{ display: 'inherit' }}>
               <Label htmlFor={'actionTypeDropdown'}>{actionTypeText}</Label>
               <Dropdown
@@ -172,8 +193,11 @@ export const OperationSearchHeader = (props: OperationSearchHeaderProps) => {
                   </Option>
                 ))}
               </Dropdown>
+              {actionTypeFilters.map((item) => (
+                <h1 key={item.key}>item.text</h1>
+              ))}
             </div>
-          ) : null}
+          ) : null} */}
         </div>
       ) : null}
       {searchTerm ? (
